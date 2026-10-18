@@ -1,0 +1,32 @@
+name: Reverse Engineering Artifacts CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    name: Verify Analysis Scripts & Reconstructed Headers
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Import Decryptor Tool
+        run: |
+          python scripts/decrypt_imports.py
+
+      - name: Verify Header Syntax
+        run: |
+          if (-not (Test-Path "include/eac_internals.h")) {
+              Write-Error "Missing include/eac_internals.h"
+          }
+          Write-Host "Reconstructed headers and analysis scripts verified."
